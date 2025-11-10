@@ -27,19 +27,20 @@ public class ManageProductCatalogJPanel extends javax.swing.JPanel {
         refreshTable();
     }
 
-    public void refreshTable() {
+   public void refreshTable() {
 
-        DefaultTableModel model = (DefaultTableModel) tblProductCatalog.getModel();
-        model.setRowCount(0);
+    DefaultTableModel model = (DefaultTableModel) tblProductCatalog.getModel();
+    model.setRowCount(0);
 
-        for (Product p : supplier.getProductCatalog().getProductcatalog()) {
-            Object row[] = new Object[3];
-            row[0] = p;
-            row[1] = p.getModelNumber();
-            row[2] = p.getPrice();
-            model.addRow(row);
-        }
+    for (Product p : supplier.getProductCatalog().getProductcatalog()) {
+        Object row[] = new Object[4];  // Changed from 3 to 4
+        row[0] = p;
+        row[1] = p.getModelNumber();
+        row[2] = p.getPrice();
+        row[3] = p.getAvailability();  // NEW LINE - add availability
+        model.addRow(row);
     }
+}
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
