@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
+import model.OrderItem;
 
 
 /**
@@ -21,12 +22,59 @@ import javax.swing.table.DefaultTableModel;
  * @author Rushabh
  */
 public class BrowseProductsJPanel extends javax.swing.JPanel {
+    
+     private JPanel userProcessContainer;
+        private SupplierDirectory supplierDirectory;
+        private ArrayList<OrderItem> shoppingCart;
 
     /** Creates new form BrowseProducts */
-    public BrowseProductsJPanel() {
+    public BrowseProductsJPanel(JPanel upc, SupplierDirectory sd) {
         initComponents();
+        userProcessContainer = upc;
+        supplierDirectory = sd;
+        shoppingCart = new ArrayList<OrderItem>();
+        populateSupplierComboBox();
       
     }
+    private void populateSupplierComboBox() {
+    cmbSupplier.removeAllItems();
+    for (Supplier s : supplierDirectory.getSupplierlist()) {
+        cmbSupplier.addItem(s);
+    }
+}
+
+private void refreshProductTable() {
+    Supplier selectedSupplier = (Supplier) cmbSupplier.getSelectedItem();
+    if (selectedSupplier == null) {
+        return;
+    }
+    
+    DefaultTableModel model = (DefaultTableModel) tblProductCatalog.getModel();
+    model.setRowCount(0);
+    
+    for (Product p : selectedSupplier.getProductCatalog().getProductcatalog()) {
+        Object[] row = new Object[4];
+        row[0] = p;
+        row[1] = p.getModelNumber();
+        row[2] = p.getPrice();
+        row[3] = p.getAvailability();
+        model.addRow(row);
+    }
+}
+
+private void refreshCartTable() {
+    DefaultTableModel model = (DefaultTableModel) tblCart.getModel();
+    model.setRowCount(0);
+    
+    for (OrderItem item : shoppingCart) {
+        Object[] row = new Object[4];
+        row[0] = item;
+        row[1] = item.getSalesPrice();
+        row[2] = item.getQuantity();
+        row[3] = item.getTotalAmount();
+        model.addRow(row);
+    }
+}
 
     
 
@@ -128,6 +176,11 @@ public class BrowseProductsJPanel extends javax.swing.JPanel {
         spnQuantity.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
 
         btnAddToCart.setText("Add to Cart");
+        btnAddToCart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddToCartActionPerformed(evt);
+            }
+        });
 
         btnProductDetails.setText("View Product Details");
         btnProductDetails.addActionListener(new java.awt.event.ActionListener() {
@@ -284,40 +337,199 @@ public class BrowseProductsJPanel extends javax.swing.JPanel {
 
     private void cmbSupplierActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbSupplierActionPerformed
         // TODO add your handling code here:
+         refreshProductTable();
         
     }//GEN-LAST:event_cmbSupplierActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
         // TODO add your handling code here:
+        userProcessContainer.remove(this);
+    CardLayout layout = (CardLayout) userProcessContainer.getLayout();
+    layout.previous(userProcessContainer);
         
     }//GEN-LAST:event_btnBackActionPerformed
 
     private void btnProductDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProductDetailsActionPerformed
         // TODO add your handling code here:
-        
+        int row = tblProductCatalog.getSelectedRow();
+    if (row < 0) {
+        JOptionPane.showMessageDialog(null, "Please select a product!", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    Product selectedProduct = (Product) tblProductCatalog.getValueAt(row, 0);
+    
+    ui.CustomerRole.ViewProductDetailJPanel vpdp = new ui.CustomerRole.ViewProductDetailJPanel(userProcessContainer, selectedProduct);
+    userProcessContainer.add("ViewProductDetail", vpdp);
+    CardLayout layout = (CardLayout) userProcessContainer.getLayout();
+    layout.next(userProcessContainer);
     }//GEN-LAST:event_btnProductDetailsActionPerformed
 
     private void btnCheckOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckOutActionPerformed
         // TODO add your handling code here:
+         if (shoppingCart.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Your cart is empty!", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    int totalAmount = 0;
+    for (OrderItem item : shoppingCart) {
+        totalAmount += item.getTotalAmount();
+    }
+    
+    int confirm = JOptionPane.showConfirmDialog(null, 
+        "Total Amount: $" + totalAmount + "\nProceed with checkout?", 
+        "Checkout Confirmation", 
+        JOptionPane.YES_NO_OPTION);
+    
+    if (confirm == JOptionPane.YES_OPTION) {
+        JOptionPane.showMessageDialog(null, 
+            "Order placed successfully!\nTotal: $" + totalAmount + "\nThank you for shopping!", 
+            "Success", 
+            JOptionPane.INFORMATION_MESSAGE);
+        
+        shoppingCart.clear();
+        refreshCartTable();
+    }
        
     }//GEN-LAST:event_btnCheckOutActionPerformed
 
     private void btnModifyQuantityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModifyQuantityActionPerformed
         // TODO add your handling code here:
+        int row = tblCart.getSelectedRow();
+    if (row < 0) {
+        JOptionPane.showMessageDialog(null, "Please select an item from cart!", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    String newQuantityText = txtNewQuantity.getText().trim();
+    if (newQuantityText.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Please enter new quantity!", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    try {
+        int newQuantity = Integer.parseInt(newQuantityText);
+        if (newQuantity <= 0) {
+            JOptionPane.showMessageDialog(null, "Quantity must be greater than 0!", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        OrderItem selectedItem = shoppingCart.get(row);
+        selectedItem.setQuantity(newQuantity);
+        refreshCartTable();
+        txtNewQuantity.setText("");
+        JOptionPane.showMessageDialog(null, "Quantity updated!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(null, "Please enter a valid number!", "Warning", JOptionPane.WARNING_MESSAGE);
+    }
         
     }//GEN-LAST:event_btnModifyQuantityActionPerformed
 
     private void btnSearchProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchProductActionPerformed
-        
+            String searchText = txtSearch.getText().trim().toLowerCase();
+    if (searchText.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Please enter a product name to search!", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    Supplier selectedSupplier = (Supplier) cmbSupplier.getSelectedItem();
+    if (selectedSupplier == null) {
+        JOptionPane.showMessageDialog(null, "Please select a supplier first!", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    DefaultTableModel model = (DefaultTableModel) tblProductCatalog.getModel();
+    model.setRowCount(0);
+    
+    boolean found = false;
+    for (Product p : selectedSupplier.getProductCatalog().getProductcatalog()) {
+        if (p.getProdName().toLowerCase().contains(searchText)) {
+            Object[] row = new Object[4];
+            row[0] = p;
+            row[1] = p.getModelNumber();
+            row[2] = p.getPrice();
+            row[3] = p.getAvailability();
+            model.addRow(row);
+            found = true;
+        }
+    }
+    
+    if (!found) {
+        JOptionPane.showMessageDialog(null, "No products found!", "Info", JOptionPane.INFORMATION_MESSAGE);
+        refreshProductTable();
+    }
     }//GEN-LAST:event_btnSearchProductActionPerformed
 
     private void btnRemoveOrderItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveOrderItemActionPerformed
-       
+       int row = tblCart.getSelectedRow();
+    if (row < 0) {
+        JOptionPane.showMessageDialog(null, "Please select an item from cart!", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    shoppingCart.remove(row);
+    refreshCartTable();
+    JOptionPane.showMessageDialog(null, "Item removed from cart!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnRemoveOrderItemActionPerformed
 
     private void btnViewOrderItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewOrderItemActionPerformed
-        
+         int row = tblCart.getSelectedRow();
+    if (row < 0) {
+        JOptionPane.showMessageDialog(null, "Please select an item from cart!", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    OrderItem selectedItem = shoppingCart.get(row);
+    
+    ViewOrderItemDetailJPanel voijp = new ViewOrderItemDetailJPanel(userProcessContainer, selectedItem);
+    userProcessContainer.add("ViewOrderItemDetail", voijp);
+    CardLayout layout = (CardLayout) userProcessContainer.getLayout();
+    layout.next(userProcessContainer);
     }//GEN-LAST:event_btnViewOrderItemActionPerformed
+
+    private void btnAddToCartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToCartActionPerformed
+        // TODO add your handling code here:
+        int row = tblProductCatalog.getSelectedRow();
+    if (row < 0) {
+        JOptionPane.showMessageDialog(null, "Please select a product!", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    Product selectedProduct = (Product) tblProductCatalog.getValueAt(row, 0);
+    
+    String priceText = txtSalesPrice.getText().trim();
+    if (priceText.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Please enter sales price!", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    int quantity = (Integer) spnQuantity.getValue();
+    if (quantity <= 0) {
+        JOptionPane.showMessageDialog(null, "Please select quantity!", "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+    
+    int salesPrice = Integer.parseInt(priceText);
+    
+    // Check if product already in cart
+    for (OrderItem item : shoppingCart) {
+        if (item.getProduct().getModelNumber() == selectedProduct.getModelNumber()) {
+            item.setQuantity(item.getQuantity() + quantity);
+            refreshCartTable();
+            JOptionPane.showMessageDialog(null, "Updated quantity in cart!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+    }
+    
+    // Add new item
+    OrderItem orderItem = new OrderItem(selectedProduct, quantity, salesPrice);
+    shoppingCart.add(orderItem);
+    refreshCartTable();
+    JOptionPane.showMessageDialog(null, "Added to cart!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+    }//GEN-LAST:event_btnAddToCartActionPerformed
 
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

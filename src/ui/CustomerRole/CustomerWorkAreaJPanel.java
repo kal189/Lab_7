@@ -5,6 +5,10 @@
  */
 package ui.CustomerRole;
 
+import model.SupplierDirectory;
+import java.awt.CardLayout;
+import javax.swing.JPanel;
+
 
 
 
@@ -16,12 +20,16 @@ package ui.CustomerRole;
  * @author Rushabh
  */
 public class CustomerWorkAreaJPanel extends javax.swing.JPanel {
+     private JPanel userProcessContainer;           
+    private SupplierDirectory supplierDirectory;
 
 
 
     /** Creates new form ProductManagerWorkAreaJPanel */
-    public CustomerWorkAreaJPanel() {
+   public CustomerWorkAreaJPanel(JPanel upc, SupplierDirectory sd)  {
         initComponents();
+         userProcessContainer = upc;
+         supplierDirectory = sd;
     }
 
     /** This method is called from within the constructor to
@@ -76,7 +84,10 @@ public class CustomerWorkAreaJPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
     private void btnBrowseCatalogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBrowseCatalogActionPerformed
         // TODO add your handling code here:
-        
+        BrowseProductsJPanel bpjp = new BrowseProductsJPanel(userProcessContainer, supplierDirectory);
+        userProcessContainer.add("BrowseProductsJPanel", bpjp);
+        CardLayout layout = (CardLayout) userProcessContainer.getLayout();
+        layout.next(userProcessContainer);
     }//GEN-LAST:event_btnBrowseCatalogActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -5,6 +5,7 @@
  */
 
 package ui.CustomerRole;
+import javax.swing.JPanel;
 
 import model.Product;
 import java.awt.CardLayout;
@@ -16,12 +17,22 @@ import javax.swing.JPanel;
  */
 public class ViewProductDetailJPanel extends javax.swing.JPanel {
 
-
+    private JPanel userProcessContainer;  
+    private Product product;
     /** Creates new form CreateProductJPanel */
-    public ViewProductDetailJPanel() {
+    public ViewProductDetailJPanel(JPanel upc, Product p) {
         initComponents();
+        userProcessContainer = upc;
+        product = p;
+        displayProduct();
         
     }
+    private void displayProduct() {
+    nameField.setText(product.getProdName());
+    idField.setText(String.valueOf(product.getModelNumber()));
+    txtPrice.setText(String.valueOf(product.getPrice()));
+    txtAvail.setText(String.valueOf(product.getAvailability()));
+}
     
     /** This method is called from within the constructor to
      * initialize the form.
@@ -127,6 +138,9 @@ public class ViewProductDetailJPanel extends javax.swing.JPanel {
 
     private void backButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButton1ActionPerformed
         // TODO add your handling code here:
+        userProcessContainer.remove(this);
+        CardLayout layout = (CardLayout) userProcessContainer.getLayout();
+        layout.previous(userProcessContainer);
         
     }//GEN-LAST:event_backButton1ActionPerformed
     
