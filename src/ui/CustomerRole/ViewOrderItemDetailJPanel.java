@@ -10,7 +10,7 @@ import model.OrderItem;
 
 /**
  *
- * @author Zerel
+ * @author Aasi
  */
 public class ViewOrderItemDetailJPanel extends javax.swing.JPanel {
 

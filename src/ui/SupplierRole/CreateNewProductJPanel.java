@@ -128,13 +128,28 @@ public class CreateNewProductJPanel extends javax.swing.JPanel {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
 
         Product p = supplier.getProductCatalog().addProduct();
-        p.setProdName(txtName.getText());
-        String stringPrice = txtPrice.getText();
-        if(stringPrice.isEmpty()==false){
-            int price = Integer.parseInt(stringPrice);
-            p.setPrice(price);
-        }
-        JOptionPane.showMessageDialog(null, "Product added!", "Info", JOptionPane.INFORMATION_MESSAGE);
+    p.setProdName(txtName.getText());
+    
+    String stringPrice = txtPrice.getText();
+    if(stringPrice.isEmpty()==false){
+        int price = Integer.parseInt(stringPrice);
+        p.setPrice(price);
+    }
+    
+    // Set a default availability for now (we'll add the field later)
+    p.setAvailability(50); // Default value
+    
+    JOptionPane.showMessageDialog(null, "Product added!", "Info", JOptionPane.INFORMATION_MESSAGE);
+    
+    // Navigate back and refresh table
+    userProcessContainer.remove(this);
+    Component[] componentArray = userProcessContainer.getComponents();
+    Component component = componentArray[componentArray.length - 1];
+    ManageProductCatalogJPanel manageProductCatalogJPanel = (ManageProductCatalogJPanel) component;
+    manageProductCatalogJPanel.refreshTable();
+    CardLayout layout = (CardLayout) userProcessContainer.getLayout();
+    layout.previous(userProcessContainer);
+        
 }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed

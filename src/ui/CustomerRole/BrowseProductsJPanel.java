@@ -19,7 +19,7 @@ import model.OrderItem;
 
 /**
  *
- * @author Rushabh
+ * @author Aasi
  */
 public class BrowseProductsJPanel extends javax.swing.JPanel {
     

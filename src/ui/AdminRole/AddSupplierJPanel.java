@@ -126,6 +126,9 @@ public class AddSupplierJPanel extends javax.swing.JPanel {
 
         Supplier supplier = supplierDirectory.addSupplier();
         supplier.setSupplyName(txtName.getText());
+            supplier.setPhone(txtPhone.getText());      
+            supplier.setEmail(txtEmail.getText());      
+
         JOptionPane.showMessageDialog(null, "Supplier added successfully!!", "Info", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnAddActionPerformed
 
